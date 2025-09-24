@@ -45,6 +45,7 @@ const signup = async (req, res) => {
 
 // Login de usuario
 const login = async (req, res) => {
+  console.log("entré al login")
   const { correo, contraseña } = req.body;
 
   try {
@@ -61,7 +62,7 @@ const login = async (req, res) => {
     const token = jwt.sign(
       { id: usuario._id, rol: usuario.rol },
       process.env.JWT_SECRET,
-      { expiresIn: "2h" }
+      { expiresIn: "24h" }
     );
 
     res.status(200).json({

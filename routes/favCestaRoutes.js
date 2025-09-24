@@ -6,7 +6,7 @@ const {
   obtenerCesta,
   agregarACesta,
   quitarDeCesta,
-} = require('../controllers/favoritosCestaController');
+} = require('../controllers/favCestaController');
 const verificarToken = require('../middleware/auth');
 
 const router = express.Router();
