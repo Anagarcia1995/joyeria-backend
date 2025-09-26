@@ -1,6 +1,5 @@
 const Usuario = require("../models/userModel");
 
-// Obtener favoritos
 const obtenerFavoritos = async (req, res) => {
   const id = req.usuarioId;
 
@@ -15,7 +14,6 @@ const obtenerFavoritos = async (req, res) => {
   }
 };
 
-// Agregar a favoritos
 const agregarAFavoritos = async (req, res) => {
   const id = req.usuarioId;
   const { productoId } = req.body;
@@ -23,10 +21,6 @@ const agregarAFavoritos = async (req, res) => {
   try {
     const usuario = await Usuario.findById(id);
     if (!usuario) return res.status(404).json({ msg: "Usuario no encontrado" });
-
-    if (usuario.rol === "admin") {
-      return res.status(403).json({ msg: "Los administradores no pueden modificar favoritos." });
-    }
 
     if (!usuario.favoritos.includes(productoId)) {
       usuario.favoritos.push(productoId);
@@ -40,7 +34,6 @@ const agregarAFavoritos = async (req, res) => {
   }
 };
 
-// Quitar de favoritos
 const quitarDeFavoritos = async (req, res) => {
   const id = req.usuarioId;
   const { productoId } = req.body;
@@ -60,9 +53,7 @@ const quitarDeFavoritos = async (req, res) => {
   }
 };
 
-// Obtener cesta
-
-const obtenerCesta = async (req, res) => {
+const tenerCesta = async (req, res) => {
   const id = req.usuarioId;
 
   try {
@@ -70,13 +61,21 @@ const obtenerCesta = async (req, res) => {
 
     if (!usuario) return res.status(404).json({ msg: "Usuario no encontrado" });
 
-    res.status(200).json(usuario.cesta);
+    const cestaTransformada = usuario.cesta.map(item => ({
+      _id: item.productoId._id,
+      nombre: item.productoId.nombre,
+      descripcion: item.productoId.descripcion,
+      precio: item.productoId.precio,
+      cantidad: item.cantidad
+    }));
+
+    res.status(200).json(cestaTransformada);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ msg: "Error al obtener la cesta" });
   }
 };
 
-// Agregar a cesta
 const agregarACesta = async (req, res) => {
   const id = req.usuarioId;
   const { productoId, cantidad } = req.body;
@@ -84,10 +83,6 @@ const agregarACesta = async (req, res) => {
   try {
     const usuario = await Usuario.findById(id);
     if (!usuario) return res.status(404).json({ msg: "Usuario no encontrado" });
-
-    if (usuario.rol === "admin") {
-      return res.status(403).json({ msg: "Los administradores no pueden modificar la cesta." });
-    }
 
     const productoEnCesta = usuario.cesta.find(
       (item) => item.productoId.toString() === productoId
@@ -106,7 +101,6 @@ const agregarACesta = async (req, res) => {
   }
 };
 
-// Quitar de cesta
 const quitarDeCesta = async (req, res) => {
   const id = req.usuarioId;
   const { productoId } = req.body;
@@ -126,13 +120,47 @@ const quitarDeCesta = async (req, res) => {
   }
 };
 
+const actualizarCantidadCesta = async (req, res) => {
+  const id = req.usuarioId;
+  const {productoId, accion} = req.body;
+
+  try {
+    const usuario = await Usuario.findById(id);
+    if (!usuario) return res.status(404).json({msg: "Usuario no encontrado"});
+
+    const productoEnCesta = usuario.cesta.find(
+      (item) => item.productoId.toString() === productoId
+    );
+    if (!productoEnCesta) {
+      return res.status(404).json({msg: "Producto no esta en la cesta"});
+    }
+    if (accion === "incrementar") {
+      productoEnCesta.cantidad += 1;
+    } else if (accion === "decrementar" && productoEnCesta.cantidad > 1) {
+      productoEnCesta.cantidad -= 1;
+    }
+    await usuario.save();
+
+    res.status(200).json({
+      msg:"Cantidad actualizada",
+      producto: {
+        _id: productoEnCesta.productoId,
+        cantidad: productoEnCesta.cantidad
+      }
+    });
+  } catch (error) {
+    console.error.apply(error);
+    res.status(500).json({ msg: "Error al actualizar la cantidad"});
+  }
+};
 
 
 module.exports = {
   obtenerFavoritos,
   agregarAFavoritos,
   quitarDeFavoritos,
-  obtenerCesta,
+  tenerCesta,
   agregarACesta,
-  quitarDeCesta
+  quitarDeCesta,
+  actualizarCantidadCesta
 };
