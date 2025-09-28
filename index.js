@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const path = require('path');
 const userRoutes = require('./routes/userRoutes');
 const productRoutes = require('./routes/productRoutes');
 const favCestaRoutes = require('./routes/favCestaRoutes'); // <--- IMPORTA LA RUTA
@@ -13,12 +14,13 @@ const app = express();
 
 const corsOptions = {
     origin: 'http://localhost:5173',
-    methods: 'GET,POST,DELETE,PUT',
+    methods: 'GET,POST,DELETE,PUT, PATCH',
     allowedHeaders: ['Content-Type', 'Authorization']
 };
 
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 mongoose.connect(process.env.MONGO_URL)
     .then(() => console.log('Conectado a MongoDB'))
