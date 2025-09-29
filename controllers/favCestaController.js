@@ -61,12 +61,14 @@ const tenerCesta = async (req, res) => {
 
     if (!usuario) return res.status(404).json({ msg: "Usuario no encontrado" });
 
-    const cestaTransformada = usuario.cesta.map(item => ({
-      _id: item.productoId._id,
-      nombre: item.productoId.nombre,
-      descripcion: item.productoId.descripcion,
-      precio: item.productoId.precio,
-      cantidad: item.cantidad
+    const cestaTransformada = usuario.cesta
+      .filter(item => item.productoId) // 👈 quitamos los que estén en null
+      .map(item => ({
+        _id: item.productoId._id,
+        nombre: item.productoId.nombre,
+        descripcion: item.productoId.descripcion,
+        precio: item.productoId.precio,
+        cantidad: item.cantidad
     }));
 
     res.status(200).json(cestaTransformada);
