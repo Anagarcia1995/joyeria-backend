@@ -57,26 +57,35 @@ const tenerCesta = async (req, res) => {
   const id = req.usuarioId;
 
   try {
+    // Buscamos el usuario y poblamos la cesta
     const usuario = await Usuario.findById(id).populate("cesta.productoId");
 
     if (!usuario) return res.status(404).json({ msg: "Usuario no encontrado" });
 
+    // Transformamos la cesta para que el frontend reciba toda la info y la URL completa de la imagen
     const cestaTransformada = usuario.cesta
-      .filter(item => item.productoId) // 👈 quitamos los que estén en null
+      .filter(item => item.productoId)
       .map(item => ({
         _id: item.productoId._id,
         nombre: item.productoId.nombre,
         descripcion: item.productoId.descripcion,
         precio: item.productoId.precio,
+        imagen: item.productoId.imagen 
+                 ? `http://localhost:5000/${item.productoId.imagen}` 
+                 : null,
         cantidad: item.cantidad
-    }));
+      }));
 
     res.status(200).json(cestaTransformada);
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ msg: "Error al obtener la cesta" });
   }
 };
+
+
+
 
 const agregarACesta = async (req, res) => {
   const id = req.usuarioId;

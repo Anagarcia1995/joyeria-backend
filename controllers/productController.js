@@ -40,6 +40,18 @@ const obtenerProductos = async (req, res) => {
   }
 };
 
+const obtenerProductoPorId = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const producto = await Producto.findById(id);
+    if (!producto) return res.status(404).json({ msg: 'Producto no encontrado' });
+    res.status(200).json(producto);
+  } catch (error) {
+    console.error('obtenerProductoPorId error:', error);
+    res.status(500).json({ msg: 'Error al obtener producto' });
+  }
+};
+
 const actualizarProducto = async (req, res) => {
   const { id } = req.params;
   const { nombre, descripcion, precio } = req.body;
@@ -87,4 +99,4 @@ const eliminarProducto = async (req, res) => {
   }
 };
 
-module.exports = { crearProducto, obtenerProductos, actualizarProducto, eliminarProducto };
+module.exports = { crearProducto, obtenerProductos,obtenerProductoPorId, actualizarProducto, eliminarProducto };

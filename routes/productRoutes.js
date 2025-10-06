@@ -4,6 +4,7 @@ const path = require('path');
 const {
   crearProducto,
   obtenerProductos,
+  obtenerProductoPorId,
   actualizarProducto,
   eliminarProducto
 } = require('../controllers/productController');
@@ -32,6 +33,7 @@ const upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024
 
 // Lectura pública (si prefieres que requiera login, añade verificarToken aquí también)
 router.get('/', obtenerProductos);
+router.get('/:id', obtenerProductoPorId);
 
 // Solo administradores para crear/actualizar/eliminar
 router.post('/', verificarToken, verificarAdmin, upload.single('imagen'), crearProducto);
